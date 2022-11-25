@@ -1,9 +1,7 @@
-import { useState, useContext } from 'react'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { useState } from 'react'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { auth } from 'config/firebase'
 import { Flex, Heading, Box, Stack, FormControl, InputGroup, InputRightElement, Input, Button, Text } from '@chakra-ui/react'
-
-import UserContext from 'contexts/UserContext'
 
 const Login = () => {
     const [mail, setMail] = useState('');
@@ -13,14 +11,13 @@ const Login = () => {
     const handleShowClick = () => setShowPassword(!showPassword);
 
     const [error, setError] = useState(null);
-    const { setUser } = useContext(UserContext);
 
     const logInWithEmailAndPassword = async () => {
         setError(null);
 
         try {
-            const response = await signInWithEmailAndPassword(auth, mail, password);
-            setUser(response.user);
+            const response = await createUserWithEmailAndPassword(auth, mail, password);
+            console.log(response);
         } catch (err) {
             setError(err.message);
         }
@@ -35,7 +32,7 @@ const Login = () => {
             justifyContent="center"
             alignItems="center"
         >
-            <Heading color="blue.500">Doctolib - Connexion</Heading>
+            <Heading color="blue.500">Doctolib - Inscription</Heading>
             <Box minW={{ base: "90%", md: "468px" }}>
                 <Stack
                     spacing={4}
