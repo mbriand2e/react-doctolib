@@ -60,7 +60,7 @@ const Login = () => {
 
                         <FormControl>
                             <InputGroup>
-                                <Input type="password" placeholder="Mot de passe..." onChange={e => setPassword(e.target.value)} />
+                                <Input type={showPassword ? "text" : "password"} placeholder="Mot de passe..." onChange={e => setPassword(e.target.value)} />
                                 <InputRightElement width="4.5rem">
                                     <Button h="1.75rem" size="sm" onClick={handleShowClick}>
                                         {showPassword ? "Hide" : "Show"}
