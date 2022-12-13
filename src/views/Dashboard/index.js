@@ -4,7 +4,7 @@ import UserContext from 'contexts/UserContext'
 import { db } from 'config/firebase'
 import { addDoc, collection, getDocs, where, query } from 'firebase/firestore'
 
-import {Flex, Heading, Stack, Box, Card, CardBody, CardHeader, Button, Input} from '@chakra-ui/react'
+import {Flex, Heading, Stack, Box, Card, CardBody, CardHeader, Button, Input, Text} from '@chakra-ui/react'
 
 const Dashboard = () => {
     const [dates, setDates] = useState([]);
@@ -31,13 +31,21 @@ const Dashboard = () => {
         const fetchRdv = async () => {
             const rdvRef = collection(db, 'rdv');
             const q = query(rdvRef, where('user_id', '==', user.uid));
+            const docList = await getDocs(q);
 
+            let rdvList = [];
+            docList.forEach(doc => {
+                const data = doc.data();
+                rdvList.push({ id: doc.id, ...data });
+                console.log(data);
+            });
 
+            setRdv(rdvList);
         }
 
         fetchPro();
         fetchRdv();
-    }, []);
+    }, [user.uid]);
 
     const validateRdv = async (proId, date) => {
         await addDoc(collection(db, 'rdv'), {
@@ -94,7 +102,17 @@ const Dashboard = () => {
             >
                 <Heading color="blue.500">Mes rendez-vous</Heading>
                 <Box minW={{ base: "90%", md: "468px" }}>
+                    {rdv.map((_rdv, index) =>
+                        <Card colorScheme="tail" key={index}>
+                            <CardHeader>
+                                <Heading size="md">{_rdv.date}</Heading>
+                            </CardHeader>
 
+                            <CardBody>
+                                <Text>{_rdv.pro_id}</Text>
+                            </CardBody>
+                        </Card>
+                    )}
                 </Box>
             </Stack>
         </Flex>
