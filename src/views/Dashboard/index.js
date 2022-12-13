@@ -2,14 +2,15 @@ import { useContext, useEffect, useState } from 'react'
 import UserContext from 'contexts/UserContext'
 
 import { db } from 'config/firebase'
-import { collection, getDocs } from 'firebase/firestore'
+import { addDoc, collection, getDocs, where, query } from 'firebase/firestore'
 
-import {Flex, Heading, Stack, Box, Card, CardBody, CardHeader} from '@chakra-ui/react'
+import {Flex, Heading, Stack, Box, Card, CardBody, CardHeader, Button, Input} from '@chakra-ui/react'
 
 const Dashboard = () => {
+    const [dates, setDates] = useState([]);
     const [pro, setPro] = useState([]);
+    const [rdv, setRdv] = useState([]);
     const { user } = useContext(UserContext);
-    console.log(user);
 
     const currentDate = new Date();
     const parsedDate = currentDate.toISOString().split('T')[0];
@@ -27,8 +28,29 @@ const Dashboard = () => {
             setPro(proList);
         };
 
+        const fetchRdv = async () => {
+            const rdvRef = collection(db, 'rdv');
+            const q = query(rdvRef, where('user_id', '==', user.uid));
+
+
+        }
+
         fetchPro();
+        fetchRdv();
     }, []);
+
+    const validateRdv = async (proId, date) => {
+        await addDoc(collection(db, 'rdv'), {
+            pro_id: proId,
+            user_id: user.uid,
+            date
+        });
+    }
+
+    const handleDateSelection = (e, id) => {
+        const { value } = e.target;
+        setDates(prevDates => ({ ...prevDates, [id]: value }));
+    }
 
     return (
         <Flex
@@ -47,18 +69,32 @@ const Dashboard = () => {
             >
                 <Heading color="blue.500">Prise de rendez-vous</Heading>
                 <Box minW={{ base: "90%", md: "468px" }}>
-                    {pro.map(_pro =>
-                        <Card colorScheme="tail">
+                    {pro.map((_pro, index) =>
+                        <Card colorScheme="tail" key={index}>
                             <CardHeader>
                                 <Heading size="md">{_pro.name}</Heading>
                             </CardHeader>
 
                             <CardBody>
-                                <label htmlFor={_pro.id + '-date'}>Date - </label>
-                                <input type="date" id={_pro.id + '-date'} min={parsedDate} />
+                                <Flex justifyContent="space-evenly">
+                                    <Input type="date" min={parsedDate} onChange={e => handleDateSelection(e, _pro.id)} />
+                                    <Button colorScheme="blue" size="md" disabled={dates[_pro.id] === ''} onClick={() => validateRdv(_pro.id, dates[_pro.id])}>Valider</Button>
+                                </Flex>
                             </CardBody>
                         </Card>
                     )}
+                </Box>
+            </Stack>
+
+            <Stack
+                flexDir="column"
+                mb="2"
+                justifyContent="center"
+                alignItems="center"
+            >
+                <Heading color="blue.500">Mes rendez-vous</Heading>
+                <Box minW={{ base: "90%", md: "468px" }}>
+
                 </Box>
             </Stack>
         </Flex>
